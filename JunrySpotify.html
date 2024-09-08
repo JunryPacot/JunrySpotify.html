@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Song Search</title>
+    <style>
+        body {
+            font-family: "Circular", "Helvetica Neue", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #191414; /* Spotify's background color */
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background-color: #000; /* Spotify's container background color */
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 40px;
+            margin-right: 10px;
+        }
+        .header h1 {
+            font-size: 24px;
+            color: #1db954; /* Spotify's primary color */
+            margin: 0;
+        }
+        .form {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 10px;
+            width: 100%;
+            margin-bottom: 10px;
+            border: 1px solid #000;
+            border-radius: 25px;
+            font-size: 16px;
+            background-color: #535353;
+            color: #fff;
+            padding-left: 20px;
+            outline: none;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #1db954;
+            color: #fff;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            width: 120px;
+        }
+        footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="Spotifyjunry.jpeg" alt="Spotify Logo">
+            <h1>Spotify Song Search</h1>
+        </div>
+        <div class="form">
+            <input type="text" id="songTitle" placeholder="Enter song title">
+            <button onclick="searchSong()">Search</button>
+        </div>
+        <div id="result"></div>
+        <footer>Developed by <a href='https://www.facebook.com/profile.php?id=100075262125552' target='_blank'>Junry Pacot</a></footer>
+    </div>
+    
+
+    <script>
+        async function searchSong() {
+            const songTitle = document.getElementById("songTitle").value;
+            if (!songTitle) {
+                alert("Please enter a song title");
+                return;
+            }
+
+            const client_id = '0257226b6e274b73a0737041d4c361e0'; // Replace with your Spotify client ID
+            const client_secret = '6e3da5be819c422097473db05adc407c; // Replace with your Spotify client secret
+
+            // Get Spotify API token
+            const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Authorization': 'Basic ' + btoa(client_id + ':' + client_secret)
+                },
+                body: 'grant_type=client_credentials'
+            });
+
+            const tokenData = await tokenResponse.json();
+            const token = tokenData.access_token;
+
+            // Search for the song
+            const songResponse = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(songTitle)}&type=track`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            const songData = await songResponse.json();
+
+            if (songData.tracks.items.length > 0) {
+                const song = songData.tracks.items[0];
+                document.getElementById('result').innerHTML = `
+                    <h2>Song: ${song.name}</h2>
+                    <p>Artist: ${song.artists[0].name}</p>
+                    <p>Album: ${song.album.name}</p>
+                    <img src="${song.album.images[0].url}" alt="Album cover" style="width:200px;">
+                `;
+            } else {
+                document.getElementById('result').innerHTML = '<p>No song found.</p>';
+            }
+        }
+    </script>
+</body>
+  </html>
